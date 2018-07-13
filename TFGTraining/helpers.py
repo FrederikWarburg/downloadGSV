@@ -193,17 +193,14 @@ def getTriplet(data, neutralLabel, neutralFeaturePath):
 
     check = (check1 * check2).reshape(np.shape(positiveRelativeIdxs))
 
-    if np.sum(check) > 1:
-        print("Check exceed 1. Something is properly wrong...")
-        print(check)
-
     positvePaths = positvePaths[check == False]
     positiveRelativeIdxs = positiveRelativeIdxs[check == False]
     positiveLabels = positiveLabels[check == False]
 
     nPositvePaths = len(positvePaths)
 
-    negativeRelativeIdxs, negativeLabels, negativePaths = getNegative(data, neutralLabel, acceptedDistance, nPositvePaths)
+    #negativeRelativeIdxs, negativeLabels, negativePaths = getNegative(data, neutralLabel, acceptedDistance, nPositvePaths)
+    negativeRelativeIdxs, negativeLabels, negativePaths = getHardNegative(data, neutralLabel, acceptedDistance, nPositvePaths, allLabels)
 
     return positiveRelativeIdxs, positiveLabels, positvePaths, negativeRelativeIdxs, negativeLabels, negativePaths
 
@@ -229,6 +226,55 @@ def getNegative(data, neuLabel, acceptedDistance, nPositvePaths):
             negativeRelativeIdxs.append(int(negativeRelativeIdx))
             n += 1
 
+
+    return negativeRelativeIdxs, negativeLabels, negativePaths
+
+def getHardNegative(data, neuLabel, acceptedDistance, nPositivePaths, allLabels):
+	
+    n = 0
+    counter = 0
+    neuLabel = int(neuLabel)
+
+    negativePaths = []
+    negativeLabels = []
+    negativeRelativeIdxs = []
+    usedNegativeIndexes = []
+
+    minLag = 2
+    maxLag = 15
+
+    # This will ensure that our negative is close to our positive and thus we will get some hard negatives. Hopefully they wont be too hard bc then we will risk to be stuck in local minima.
+    marginDistance = acceptedDistance * minLag
+    minDistance = neuLabel - (acceptedDistance * maxLag)
+    maxDistance = neuLabel + (acceptedDistance * maxLag)
+
+    while n < nPositivePaths:
+
+        counter += 1
+        randomLabel = np.random.randint(minDistance,maxDistance)
+
+        index = np.argmin(np.abs(allLabels - int(randomLabel)))
+
+        if index == list():
+            index = index[0]	
+
+        negativeRelativeIdx, negativeLabel, negativePath = data[index,:].T
+
+        if index not in usedNegativeIndexes:
+
+            if np.abs(neuLabel - int(negativeLabel)) > marginDistance:
+
+                negativePaths.append(negativePath)
+                negativeLabels.append(int(negativeLabel))
+                negativeRelativeIdxs.append(int(negativeRelativeIdx))
+                usedNegativeIndexes.append(index)
+                n += 1
+
+                #If we have too difficult time to find hard negatives, just find some random negatives.
+            if counter > nPositivePaths:
+
+                minDistance = 0
+                maxDistance = np.max(allLabels)
 
     return negativeRelativeIdxs, negativeLabels, negativePaths
 

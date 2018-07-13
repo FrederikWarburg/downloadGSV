@@ -108,8 +108,8 @@ def makeBlocks(sequencePath, savePath, date, model):
 ########################### Main ##############################################################
 ###############################################################################################
 
-cityPath = "/Users/frederikwarburg/Desktop/Zaragoza/dataset/London/"
-baseSavePath = "/Users/frederikwarburg/Desktop/Zaragoza/dataset/LondonFeatures/"
+cityPath = "../../../datasets/Boston/"
+baseSavePath = "../../../datasets/BostonFeatures/"
 
 dirs = os.listdir(cityPath)
 
