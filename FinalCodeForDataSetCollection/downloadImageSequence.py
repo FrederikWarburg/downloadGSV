@@ -1,6 +1,7 @@
 import google_streetview.api
 import google_streetview.helpers
 import json
+import cv2
 from gmplot import gmplot
 import math
 import imageio
@@ -8,11 +9,13 @@ from helpers import closest_node_in_meters
 import numpy as np
 import os
 import pandas as pd
-from pathEstimation import bspline_planning
-from getSequences2 import measure
 import time
 
-def displayResults(sequences,download, directory, apiKey, center, labels, labelPos):
+from pathEstimation import bspline_planning
+from getSequences2 import measure
+import matplotlib.pyplot as plt
+
+def displayResults(sequences,download, directory, apiKey, center, labels, labelPos, cityName):
     dict = {}
 
     for s, sequence in enumerate(sequences):
@@ -45,10 +48,10 @@ def displayResults(sequences,download, directory, apiKey, center, labels, labelP
 
                 if download:
                     filename = dateDirectory + "/{}.png".format(frame)
-                    downloadImage(panoid, orientation, filename, apiKey)
+                    downloadImage(panoid, orientation, filename, apiKey, cityName)
 
                     filename = reverseDateDirectory + "/{}.png".format(frame)
-                    downloadImage(panoid, (orientation+180)%360, filename, apiKey)
+                    downloadImage(panoid, (orientation+180)%360, filename, apiKey, cityName)
 
                 if tmp_dict == {}:
 
@@ -182,10 +185,11 @@ def makePlotOfResults(data, lat, lon):
     return gmap
 
 
+def downloadImage(panoid, heading, filename, apiKey, cityName):
 
-def downloadImage(panoid, heading, filename, apiKey):
+    tmpStorage = "{}TmpStorage".format(cityName)
 
-    tmpStorage = "tmpStorage"
+    prevImage = cv2.imread(tmpStorage + "/gsv_0.jpg")
 
     # Create a dictionary with multiple parameters separated by ;
     apiargs = {
@@ -206,27 +210,24 @@ def downloadImage(panoid, heading, filename, apiKey):
     # Download images to directory 'downloads'
     results.download_links(tmpStorage)
 
-    metadata = json.loads(tmpStorage + "/metadata.json")
+    newImage = cv2.imread(tmpStorage + "/gsv_0.jpg")
 
-    status = metadata['status']
-
-    if status == "OK":
-        removeGoogleLogo(filename)
+    if not np.all(newImage == prevImage):  # I dont trust the meta object. We look at the image directly.
+        removeGoogleLogo(filename, cityName)
     else:
-        print("Status not OK")
-        print('Status is ', status)
-        print("Python going to sleep for 1 day.")
-        time.sleep(24*60*60)
-        downloadImage(panoid,heading,filename,apiKey)
+        print("The current image is the same as the previous image. This is properly because we exceeded the amount of downloads per day. It is decided to pause the program for 19h")
+        time.sleep(19*60*60)
+        downloadImage(panoid,heading,filename,apiKey,cityName)
 
-def removeGoogleLogo(filename):
+
+def removeGoogleLogo(filename, cityName):
 
     try:
-        im = imageio.imread("tmpStorage/gsv_0.jpg")
+
+        im = cv2.cvtColor(cv2.imread("{}TmpStorage/gsv_0.jpg".format(cityName)),cv2.COLOR_BGR2RGB)
         im = im[:-40,:,:]
 
         imageio.imwrite(filename,im)
 
     except:
         print("We encountered an error when reading image: " + filename)
-        print(im)

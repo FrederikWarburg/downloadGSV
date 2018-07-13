@@ -14,8 +14,9 @@ import numpy as np
 
 def mainFunction(cityName):
 
-    continueWithCity = False
     print(cityName)
+	
+    continueWithCity = False
     plotInterpolationResults = False
     plotPanoidsPositionResults = False
     plotChosenSequences = False
@@ -25,11 +26,12 @@ def mainFunction(cityName):
     apiKey = 'AIzaSyDXmwm0xlivvdNj2JB2aBMSCCCmD3sSW9g'
     chains = ["mcdonalds", "cinema", "stadium"]
 
-    baseDirectory =  '/Users/frederikwarburg/Desktop/Zaragoza/dataset2/{}/'.format(cityName)
+    baseDirectory =  '/home/frederik/Desktop/dataset/{}/'.format(cityName)
 
-    cityCoords = [[51.507351, -0.127758], [42.357978, -71.060782], [33.900527, -118.159436], [40.414523, -3.705759]]
+    cityCoords = [[19.409084, -99.145136], [42.357978, -71.060782], [33.900527, -118.159436], [40.414523, -3.705759],
+                  [51.521473,  -0.105750], [48.852287,   2.346714], [41.399400,    2.181038], [37.879586, -122.270670]]
 
-    if cityName == 'London':
+    if cityName == 'Mexico City':
         cityCoord = cityCoords[0]
     elif cityName == 'Boston':
         cityCoord = cityCoords[1]
@@ -37,11 +39,17 @@ def mainFunction(cityName):
         cityCoord = cityCoords[2]
     elif cityName == 'Madrid':
         cityCoord = cityCoords[3]
+    elif cityName == 'London':
+        cityCoord = cityCoords[4]
+    elif cityName == 'Paris':
+        cityCoord = cityCoords[5]
+    elif cityName == 'Barcelona':
+        cityCoord = cityCoords[6]
+    elif cityName == "San Francisco":
+        cityCoord = cityCoords[7]
 
     lat = cityCoord[0]
     lon = cityCoord[1]
-
-
 
     numFrames = np.array(range(30,4,-1)) # max 50 frames and min 5 frames
     numDates = 4
@@ -60,23 +68,23 @@ def mainFunction(cityName):
         totalDownloadedSequencesPerLength = np.zeros(len(numFrames))  # How many sequences per length: f.eks 1 sequence of 5 frame, 2 sequence of 6 frames, ...
         usedPanoids = []
 
-    routePoints = [[51.5176, -0.08237], [51.50282, -0.11136], [51.51017, -0.1307], [51.50124, -0.11969], [51.51361, -0.12907], [51.50121, -0.19307], [51.49826, -0.16571], [51.50631, -0.12693], [51.51346, -0.15936], [51.52436, -0.13799], [51.51375, -0.14962], [51.51365, -0.12913], [51.51099, -0.1339], [51.51795, -0.11074], [51.50885, -0.1245], [51.51434, -0.10778], [51.51786, -0.11968], [51.53011, -0.12317], [51.51619, -0.17472], [51.48439, -0.06841], [51.50897, -0.13432], [51.49606, -0.04483], [51.51086, -0.13039], [51.51984, -0.09298], [51.52115, -0.05112], [51.5243, -0.07399], [51.51148, -0.13032], [51.51126, -0.12939], [51.4987, -0.09859], [51.46122, -0.11501], [51.50783, -0.02249], [51.47448, -0.02448], [51.51067, -0.13374], [51.50616, -0.01805], [51.46251, -0.13819], [51.50483, -0.11366], [51.50872, -0.13236], [51.45642, -0.07617], [51.52358, -0.07208], [51.51263, -0.13062], [51.55488, -0.10843], [51.48141, -0.19139], [51.48166, -0.19095], [51.53049, -0.17103], [51.55509, -0.10928], [51.55157, -0.11379], [51.48261, -0.19155]]
-
+    routePoints = generateRoutes(chains,lat,lon,apiKey)
+    print(cityName)
 
     for i, from_ in enumerate(routePoints):
         for j, to_ in enumerate(routePoints):
             if i!=j:
-                print(i,j, measure(from_[0],from_[1],to_[0],to_[1]))
+                
                 if measure(from_[0],from_[1],to_[0],to_[1]) > 1000: # distance between points must be more than 1 km
 
                     # This enables os to continue with the same city eventhough the program is stopped.
                     currentFolders = os.listdir(baseDirectory)
-                    print(currentFolders)
+                   
                     if 'from: {0} to: {1}'.format(str(from_),str(to_)) not in currentFolders:
 
                         #t0 = time.time()
 
-                        print("Downloading street view images from " + str(from_) + " to "+ str(to_))
+                        #print("Downloading street view images from " + str(from_) + " to "+ str(to_))
 
                         directory = baseDirectory+ 'from: {0} to: {1}/'.format(str(from_),str(to_))
 
@@ -84,9 +92,13 @@ def mainFunction(cityName):
 
                         if not testing:
                             lats,lons, pos = getGeoCoordinates(from_,to_, apiKey)
-                            print(lats, lons)
+
+                            labelPos = pos[:, :2]
+
+                            labels = list(range(uniqueLabelCounter, uniqueLabelCounter + len(labelPos)))
+                            uniqueLabelCounter += len(labels)
                             #t1 = time.time()
-                            print("We have the geo-coordinates of this route. It took " + str(t1-t0) + " seconds" )
+                            #print("We have the geo-coordinates of this route. It took " + str(t1-t0) + " seconds" )
 
                             if plotInterpolationResults:
                                 plt = plotInterpolation(pos, lats, lons, True)
@@ -99,7 +111,7 @@ def mainFunction(cityName):
                             pointsOfInterest = getPointsOfInterest(pos)
 
                             #t2 = time.time()
-                            print("We have the points of interest of this route. It took " + str(t2 - t1) + " seconds")
+                            #print("We have the points of interest of this route. It took " + str(t2 - t1) + " seconds")
 
                             ###########
                             # Sort by date
@@ -111,7 +123,7 @@ def mainFunction(cityName):
                                 plotPanoidsPosition(gps,pos)
 
                             #t3 = time.time()
-                            print("We have the sorted the points of this route. It took " + str(t3 - t2) + " seconds")
+                            #print("We have the sorted the points of this route. It took " + str(t3 - t2) + " seconds")
 
                         # For testing and debugging
                         #else:
@@ -133,26 +145,27 @@ def mainFunction(cityName):
 
                         #t4 = time.time()
 
-                        if not testing:
-                            print("We have gotten the sequences this route. It took " + str(t4 - t3) + " seconds")
+                        #if not testing:
+                        #    print("We have gotten the sequences this route. It took " + str(t4 - t3) + " seconds")
 
                         #############
                         # Download images
                         ##############
 
-                        uniqueLabelCounter = displayResults(allSequences,download,directory, apiKey, city, uniqueLabelCounter)
+                        displayResults(allSequences, download, directory, apiKey, cityCoord, labels, labelPos,cityName)
 
                         #t5 = time.time()
 
-                        print("We have the download the images this route. It took " + str(t5 - t4) + " seconds")
+                        #print("We have the download the images this route. It took " + str(t5 - t4) + " seconds")
 
-                        print("The total time of this route was " + str(t5 - t0))
+                        #print("The total time of this route was " + str(t5 - t0))
 
                         totalDownloadedSequences += len(allSequences)
 
                         distance, distancesOfEachSequence, framesOfEachSequence = calculateDistanceOfSequences(allSequences)
                         totalDownloadedSequencesKm += distance
 
+                        print(cityName)
                         print("We have now downloaded at total of " + str(totalDownloadedSequences) + " sequences!")
                         print("We have now downloaded at total of " + str(totalDownloadedSequencesKm) + " km of sequences!")
 

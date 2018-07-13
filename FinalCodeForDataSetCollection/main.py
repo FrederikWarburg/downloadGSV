@@ -21,9 +21,9 @@ testing = False
 
 apiKey = 'AIzaSyDXmwm0xlivvdNj2JB2aBMSCCCmD3sSW9g'
 chains = ["mcdonalds", "cinema", "stadium"]
-cities = [[37.879526, -122.270670]]# , [51.507351,-0.127758] # mexico city,london
-cityNames = ["Mexico City"]
-baseDirectory =  '/Users/frederikwarburg/Desktop/Zaragoza/dataset/San Francisco/'
+cities = [[51.507351,-0.127758]] # london
+cityNames = ["London"]
+baseDirectory =  '/Users/frederikwarburg/Desktop/Zaragoza/dataset/LondonReverse/'
 
 numFrames = np.array(range(30,4,-1)) # max 50 frames and min 5 frames
 numDates = 4
@@ -51,7 +51,7 @@ for city in cities:
     for i, from_ in enumerate(routePoints):
         for j, to_ in enumerate(routePoints):
             if i!=j:
-                if measure(from_[0],from_[1],to_[0],to_[1]) > 1000:# and j == 1: # distance between points must be more than 1 km
+                if measure(from_[0],from_[1],to_[0],to_[1]) > 1000: # distance between points must be more than 1 km
 
                     # This enables os to continue with the same city eventhough the program is stopped.
                     currentFolders = os.listdir(baseDirectory)
@@ -102,8 +102,7 @@ for city in cities:
                             t3 = time.time()
                             print("We have the sorted the points of this route. It took " + str(t3 - t2) + " seconds")
 
-                            # For testing and debugging
-                            print(labels, labelPos)
+                        # For testing and debugging
                         else:
                             gps = getGPS()
 

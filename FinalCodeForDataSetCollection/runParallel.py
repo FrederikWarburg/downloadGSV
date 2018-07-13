@@ -2,7 +2,8 @@ from mainFunction import mainFunction
 from multiprocessing import Pool, Process
 
 
-cityNames = ['London', 'Boston', 'Los Angeles','Madrid']
+#cityNames = ['San Francisco', 'London', 'Barcelona','Boston']
+cityNames = ['London', 'Madrid', 'San Francisco','Boston']
 #cityNames = ['London']
 
 

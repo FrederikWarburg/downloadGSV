@@ -27,8 +27,9 @@ def generateRoutes(chains,lat,lon, apiKey):
             place = str(place)
             latPos = place.find("lat=")
             lonPos = place.find("lng=")
-            lat = np.float64(place[latPos+4:latPos+12])
-            lon = np.float64(place[lonPos+4:lonPos+12])
+
+            lat = np.float64(place[latPos+4:latPos+11])
+            lon = np.float64(place[lonPos+4:lonPos+11])
             #gmap.scatter([lat], [lon], color=colors2[i], edge_width=10)
             pos.append([lat,lon])
 

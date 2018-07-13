@@ -96,6 +96,9 @@ def sortPointsOfInterestByDate(pointsOfInterest,pos):
         year = point['year']
         month = point['month']
 
+        if len(str(month)) == 1:
+            month = "0" + str(month)
+
         if str(year) + str(month) in gps:
 
             lat = point['lat']
