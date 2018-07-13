@@ -10,7 +10,7 @@ def loadImages(dirs, city, inp, ref):
     for dir in dirs:
         if dir != ".DS_Store" and dir != "cityInfo.txt" and dir != "usedPanoids.txt":
 
-            path = city + "/" + dir
+            path = city + dir
 
             tmpImInput, tmpLabelInput, tmpDatesInput = getImagesAndLabels(path, inp)
             tmpImRef, tmpLabelRef, tmpDatesRef = getImagesAndLabels(path, ref)
@@ -36,7 +36,8 @@ def getImagesAndLabels(dir, ref):
 
     for file in os.listdir(dir):
         if file != "description.json" and file!="overview_map.html" and file!= "overview.json" and file!=".DS_Store":
-
+            
+		
             dates = getDates(dir + "/" + file)
 
             date = dates[ref]

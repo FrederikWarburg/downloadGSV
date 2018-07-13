@@ -47,11 +47,11 @@ def extractFeatures(path, date, n_images, season, model1, model2):
 
         # Use resnet to make prediction
         feat_1 = model1.predict(img).flatten()
-        feat_1 = np.reshape(feat_1, (1, 50176)) # Process image with pre trained model
+        feat_1 = np.reshape(feat_1, (1, 224*224)) # Process image with pre trained model
 
         # Use added layers to create feature descriptor
         feat = model2.predict(feat_1)
-        feat = np.reshape(feat, (128)) # Process vector with the added layers
+        feat = np.reshape(feat, (256)) # Process vector with the added layers
 
         features.append(feat)
 
@@ -61,18 +61,17 @@ def extractFeatures(path, date, n_images, season, model1, model2):
 
 
 # This function loads the pre-trained network (RESNET50)
-def create_base_network(input_shape):
+def create_base_network(input_shape, modelPath = 'resnet50_activation23.h5' ):
     '''Base network to be shared (eq. to feature extraction).
     '''
-    MODEL_PATH = 'resnet50_activation23.h5'
-    model = load_model(MODEL_PATH)
+
+    model = load_model(modelPath)
     return model
 
 # This function loads the trained layers
-def create_added_network(input_shape_2):
+def create_added_network(input_shape_2, modelPath = 'triplet_resnet23_fc_128_lr0001_std005_wd_00000005_adam_norelu_nodrop_5_epochs.h5'):
     '''Base network to be shared (eq. to feature extraction).
     '''
-    MODEL_PATH = 'triplet_resnet23_fc_128_lr0001_std005_wd_00000005_adam_norelu_nodrop_5_epochs.h5'
     #model.load_weights(WEIGHTS_PATH, by_name=True)
-    model = load_model(MODEL_PATH)
+    model = load_model(modelPath)
     return model

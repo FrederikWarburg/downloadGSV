@@ -13,6 +13,9 @@ from helper2 import getClosestReferenceLabels, getImageByLabel, loadImages
 from networks2 import extractFeatures2
 import numpy as np
 import os
+import cv2
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 ###############
@@ -21,21 +24,38 @@ import matplotlib.pyplot as plt
 ###############
 
 # PATH OF THE IMAGES (change the path)
-city = "London"
+city = "Boston"
 
-cityPath = city + "/"
+cityPath = "../../../datasets/" + city + "/"
+
+#modelPath = "../TFGTraining/trainedModels/triplet_resnet23_fc_256_lr3.125e-07_adam_norelu_default_Bias0_drop3_2_epochs.h5"
+# Accuracy of this path is  0.395
+# Number of reference images  762
+
+#modelPath = "../TFGTraining/trainedModels/triplet_vgg16_prueba.h5"
+# Accuracy of this path is  0.365
+# Number of reference images  762
+
+modelPath = "../TFGTraining/triplet_resnet23_fc_256_lr00001_adam_norelu_default_Bias0_drop3_8_epochs.h5"
+# Accuracy of this path is  0.467
+# Number of reference images  762
+
+
 dirs = os.listdir(cityPath)
-dirs = dirs[1:] # Used to skip a default folder on mac called .DS_Store (not sure if you have that one)
+
+#dirs = dirs[1:] # Used to skip a default folder on mac called .DS_Store (not sure if you have that one)
 
 # The script only compares two images. I have 4 images from the same place. Therefore, I have to chose which two time-stamps
 # I want to use for comparison. If you only have 2 time-stamps, then this shouldn't be used.
-ref = 0 # olderst
+ref = 1 # olderst
 inp = 3 # newest
 
 print("Load images")
 # You will have to change this function such that it fits your data.
 # It should load you data: Images and Labels (dates are probably not relevant in your case).
-imInput, labelInput, datesInput, imRefs, labelRefs, datesRefs = loadImages(dirs, city, inp, ref)
+imInput, labelInput, datesInput, imRefs, labelRefs, datesRefs = loadImages(dirs, cityPath, inp, ref)
+
+print(np.shape(imInput))
 
 # PARAMETERS: (change test size if you don't want to test on all your data)
 test_size = len(labelRefs)
@@ -47,8 +67,8 @@ test_size = len(labelRefs)
 print("Load models")
 input_shape = (224, 224, 3)  # Pre-trained model input size
 model1 = create_base_network(input_shape)
-input_shape2 = (50176,)  # Added model input size
-model2 = create_added_network(input_shape2)
+input_shape2 = (224*224,)  # Added model input size
+model2 = create_added_network(input_shape2, modelPath)
 
 ####################
 # Feature extraction (nothing needs to be changed here)
@@ -58,6 +78,8 @@ print("Extract Features")
 # Dimensions: [number of images, Dimension descriptor], [number of images]
 inputFeatures = extractFeatures2(imInput, model1, model2)
 referenceFeatures = extractFeatures2(imRefs, model1, model2)
+
+distances = np.sqrt(np.sum( (inputFeatures - referenceFeatures)**2, axis = 1))
 
 ####################
 #               Change the way you calculate accuracy
@@ -94,6 +116,10 @@ accuracy = np.round(np.sum(np.abs(np.array(prediction) - np.array(trueLabels)) <
 print("Accuracy of this path is ", accuracy)
 print("Number of reference images ", len(imRefs))
 
+
+
+"""
+
 # This should probably also be change to fit your data.
 predictionImages, predictionDates = getImageByLabel(imRefs, labelRefs, prediction, datesRefs)
 trueImages, trueDates = getImageByLabel(imRefs, labelRefs, trueLabels, datesRefs)
@@ -119,4 +145,4 @@ for inputIm, inputLabel, inputDate, predIm, predLabel, predDate, trueIm, trueLab
     plt.imshow(trueIm)
 
     plt.show()
-
+"""

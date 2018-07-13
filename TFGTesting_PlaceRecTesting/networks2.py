@@ -22,11 +22,11 @@ def extractFeatures2(images, model1, model2):
 
         # Use resnet to make prediction
         feat_1 = model1.predict(im).flatten()
-        feat_1 = np.reshape(feat_1, (1, 50176)) # Process image with pre trained model
+        feat_1 = np.reshape(feat_1, (1, 224*224)) # Process image with pre trained model
 
         # Use added layers to create feature descriptor
         feat = model2.predict(feat_1)
-        feat = np.reshape(feat, (128)) # Process vector with the added layers
+        feat = np.reshape(feat, (256)) # Process vector with the added layers
 
         features.append(feat)
 
