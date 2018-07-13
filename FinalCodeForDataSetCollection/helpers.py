@@ -1,6 +1,9 @@
 import numpy as np
 import math
 
+def testFunctionThatDoesDoAnyThing():
+	return 1
+
 def dumpUsedPanoids(usedPanoids, directory):
 
     labelFile = open(directory + 'usedPanoids.txt', 'w')
