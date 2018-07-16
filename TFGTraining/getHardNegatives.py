@@ -3,18 +3,16 @@ import cv2
 import numpy as np
 from PIL import Image
 
+
 from distanceFunctions import hamming2
 
-def getNHardNegative(data, anchorLabel, allLabels,nPositives,difficulty):
+def getNHardNegative(data, anchorLabel,anchorPath, neutralRelativeIdx, allLabels, nPositives,difficulty):
     # This method use the average hashing to get similar images.
     anchorLabel = int(anchorLabel)
 
-    anchorIdx = allLabels.index(anchorLabel)
-    anchorRelativeIdx, anchorLabel, anchorPath = data[anchorIdx, :].T
-
     a = anchorPath.find("Features")
+    anchorImagePath = anchorPath[0:a] + anchorPath[a+len("Features"):-len("resnet_features.npy")] +str(neutralRelativeIdx) +".png"
 
-    anchorImagePath = anchorPath[0:a] + anchorPath[a+len("Features"):]
     anchorImage = Image.fromarray(cv2.imread(anchorImagePath))
     anchorImageHash = imagehash.average_hash(anchorImage, 8)
 
@@ -24,9 +22,9 @@ def getNHardNegative(data, anchorLabel, allLabels,nPositives,difficulty):
     usedNegativeIndexes = [] # To avoid we do not have the same negative in batch.
 
     numberOfNegatives = 0
-
+    counter = 0
     while numberOfNegatives < nPositives:
-
+        counter += 1
         randomIdx = np.random.randint(0, len(allLabels))
 
         # To avoid we do not have the same negative in batch.
@@ -35,9 +33,9 @@ def getNHardNegative(data, anchorLabel, allLabels,nPositives,difficulty):
             negativeRelativeIdx, negativeLabel, negativePath = data[randomIdx, :].T
 
             # random label should be far from anchor label to make sure it is not the same place.
-            if np.abs(negativeLabel-anchorLabel) > 100:
+            if np.abs(int(negativeLabel)-anchorLabel) > 100:
 
-                negativeImagePath = negativePath[0:a] + negativePath[a + len("Features"):]
+                negativeImagePath = negativePath[0:a] + negativePath[a + len("Features"):-len("resnet_features.npy")] +str(negativeRelativeIdx) +".png"
                 negativeImage = Image.fromarray(cv2.imread(negativeImagePath))
                 negativeImageHash = imagehash.average_hash(negativeImage, 8)
 
@@ -52,6 +50,10 @@ def getNHardNegative(data, anchorLabel, allLabels,nPositives,difficulty):
                     usedNegativeIndexes.append(randomIdx)
 
                     numberOfNegatives += 1
+
+        # reduce difficulty if we have a difficult time finding negatives.
+        if counter % 100 == 0:
+            difficulty += 1
 
     return negativeRelativeIdxs, negativeLabels, negativePaths
 

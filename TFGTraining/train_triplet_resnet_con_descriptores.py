@@ -55,61 +55,64 @@ for epoch in range(0, epochs):
         neutralFeature = loadFeature(neutralPath, neutralRelativeIdx)
 
         # We find all triplets n positives and n negatives
-        positiveRelativeIdxs, positiveLabels, positvePaths, negativeRelativeIdxs, negativeLabels, negativePaths = getTriplet(data,neutralLabel,neutralPath)
+        positiveRelativeIdxs, positiveLabels, positvePaths, negativeRelativeIdxs, negativeLabels, negativePaths = getTriplet(data,neutralLabel,neutralPath, neutralRelativeIdx)
 
         # Number of positive and negative features
         nPositive, nNegative = len(positiveLabels),len(negativeLabels)
         pCounter, nCounter = 0,0
 
-        # Initialize batch and weights
-        batch = np.zeros(shape=(batchSize, 3, inputSize), dtype=np.float32)
-        weights = np.ones(shape=(batchSize), dtype=np.uint8) # Have no influence on result. Just a hack.
+        if nNegative >= 6:
 
-        batchIndex = 0
+            # Initialize batch and weights
+            batch = np.zeros(shape=(batchSize, 3, inputSize), dtype=np.float32)
+            weights = np.ones(shape=(batchSize), dtype=np.uint8) # Have no influence on result. Just a hack.
 
-        # We fill n batch with unique combinations of triplets
-        # And train the model for each batch
-        for pCounter in range(nPositive):
+            batchIndex = 0
 
-            # Load a positive feature
-            positiveRelativeIdx, positivePath = positiveRelativeIdxs[pCounter], positvePaths[pCounter]
-            positiveFeature = loadFeature(positivePath, positiveRelativeIdx)
+            # We fill n batch with unique combinations of triplets
+            # And train the model for each batch
+            for pCounter in range(nPositive):
 
-            for nCounter in range(nNegative):
+                # Load a positive feature
+                positiveRelativeIdx, positivePath = positiveRelativeIdxs[pCounter], positvePaths[pCounter]
+                positiveFeature = loadFeature(positivePath, positiveRelativeIdx)
 
-                # Load a negative feature
-                negativeRelativeIdx, negativePath =  negativeRelativeIdxs[nCounter], negativePaths[nCounter]
-                negativeFeature = loadFeature(negativePath, negativeRelativeIdx)
+                for nCounter in range(nNegative):
 
-                # Add a triplet to batch
+                    # Load a negative feature
+                    negativeRelativeIdx, negativePath =  negativeRelativeIdxs[nCounter], negativePaths[nCounter]
+                    negativeRelativeIdx, negativePath =  negativeRelativeIdxs[nCounter], negativePaths[nCounter]
+                    negativeFeature = loadFeature(negativePath, negativeRelativeIdx)
 
-                batch[batchIndex, 0] = positiveFeature
-                batch[batchIndex, 1] = neutralFeature
-                batch[batchIndex, 2] = negativeFeature
+                    # Add a triplet to batch
 
-                batchIndex += 1
+                    batch[batchIndex, 0] = positiveFeature
+                    batch[batchIndex, 1] = neutralFeature
+                    batch[batchIndex, 2] = negativeFeature
 
-                # We only train if we have a full batch. This might mean that there are some data we do not look at.
-                # It could be implemented that the last batch was smaller (the size of the remainder of combinations).
-                if batchIndex >= batchSize: # Batch is full
+                    batchIndex += 1
 
-                    loss = model.train_on_batch([batch[:, 0], batch[:, 1], batch[:, 2]], weights) #weight is not used for anything
+                    # We only train if we have a full batch. This might mean that there are some data we do not look at.
+                    # It could be implemented that the last batch was smaller (the size of the remainder of combinations).
+                    if batchIndex >= batchSize: # Batch is full
 
-                    # Save loss
-                    historial_loss.append(loss)
+                        loss = model.train_on_batch([batch[:, 0], batch[:, 1], batch[:, 2]], weights) #weight is not used for anything
 
-                    # Reset batch
-                    batch = np.zeros(shape=(batchSize, 3, inputSize), dtype=np.float32)
-                    batchIndex = 0
+                        # Save loss
+                        historial_loss.append(loss)
 
-                    n_iters_lr_decay += 1
+                        # Reset batch
+                        batch = np.zeros(shape=(batchSize, 3, inputSize), dtype=np.float32)
+                        batchIndex = 0
 
-                    # Decay learning rate
-                    if n_iters_lr_decay >= 26000:
-                        lr_init = lr_init*0.5
-                        model.lr = lr_init
-                        n_iters_lr_decay = 0
-                        print("Learning rate updated to: ", model.lr)
+                        n_iters_lr_decay += 1
+
+                        # Decay learning rate
+                        if n_iters_lr_decay >= 26000:
+                            lr_init = lr_init*0.5
+                            model.lr = lr_init
+                            n_iters_lr_decay = 0
+                            print("Learning rate updated to: ", model.lr)
 
         # Print status
         if labelIndex % 1000 == 0:

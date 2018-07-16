@@ -178,7 +178,7 @@ def loadFeature(path, relativeIdx):
 
     return feature
 
-def getTriplet(data, neutralLabel, neutralFeaturePath):
+def getTriplet(data, neutralLabel,neutralFeaturePath, neutralRelativeIdx):
 
     acceptedDistance = 15 # m
     allLabels = np.array(list(map(int, data[:,1])))
@@ -201,7 +201,8 @@ def getTriplet(data, neutralLabel, neutralFeaturePath):
 
     #negativeRelativeIdxs, negativeLabels, negativePaths = getNegative(data, neutralLabel, acceptedDistance, nPositvePaths)
     #negativeRelativeIdxs, negativeLabels, negativePaths = getHardNegative(data, neutralLabel, acceptedDistance, nPositvePaths, allLabels)
-    difficulty = 8
-    negativeRelativeIdxs, negativeLabels, negativePaths = getNHardNegative(data, neutralLabel, allLabels, nPositvePaths,difficulty)
+    #difficulty = 7 # in avg we look 10x the images we need to obtain the negatives we need.
+    difficulty = 2
+    negativeRelativeIdxs, negativeLabels, negativePaths = getNHardNegative(data, neutralLabel,neutralFeaturePath, neutralRelativeIdx, allLabels, nPositvePaths,difficulty)
 
     return positiveRelativeIdxs, positiveLabels, positvePaths, negativeRelativeIdxs, negativeLabels, negativePaths
