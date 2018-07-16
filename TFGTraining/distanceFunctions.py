@@ -11,3 +11,8 @@ def cosine_distance(vects):
 def eucl_dist_output_shape(shapes):
     shape1, shape2 = shapes
     return (shape1[0], 1)
+
+def hamming2(s1, s2):
+    """Calculate the Hamming distance between two bit strings"""
+    assert len(s1) == len(s2)
+    return sum(c1 != c2 for c1, c2 in zip(s1, s2))
