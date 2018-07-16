@@ -16,7 +16,7 @@ def mainFunction(cityName):
 
     print(cityName)
 	
-    continueWithCity = False
+    continueWithCity = True
     plotInterpolationResults = False
     plotPanoidsPositionResults = False
     plotChosenSequences = False
@@ -58,8 +58,8 @@ def mainFunction(cityName):
 
     # This enables os to continue with the same city eventhough the program is stopped.
     if continueWithCity:
-        uniqueLabelCounter, totalDownloadedSequences, totalDownloadedSequencesKm, totalDownloadedSequencesPerLength = getCityInfo()
-        usedPanoids = getUsedPanoids()
+        uniqueLabelCounter, totalDownloadedSequences, totalDownloadedSequencesKm, totalDownloadedSequencesPerLength = getCityInfo(baseDirectory)
+        usedPanoids = getUsedPanoids(baseDirectory)
 
     else:
         uniqueLabelCounter = 0 # Used to label data such that each point in a radius of 15 m gets the same label.
