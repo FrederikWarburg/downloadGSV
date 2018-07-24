@@ -215,8 +215,8 @@ def downloadImage(panoid, heading, filename, apiKey, cityName):
     if not np.all(newImage == prevImage):  # I dont trust the meta object. We look at the image directly.
         removeGoogleLogo(filename, cityName)
     else:
-        print("The current image is the same as the previous image. This is properly because we exceeded the amount of downloads per day. It is decided to pause the program for 19h")
-        time.sleep(19*60*60)
+        print("The current image is the same as the previous image. This is properly because we exceeded the amount of downloads per day. It is decided to pause the program for 1h")
+        time.sleep(1*60*60)
         downloadImage(panoid,heading,filename,apiKey,cityName)
 
 
